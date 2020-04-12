@@ -14,3 +14,5 @@ Pin allocations for the Arduino:
 	- motor 2 (large) output (digital pin) D3
 	- Humiture detector (digital pin) D4
 
+Resources:
+	SMS on Arduino with GSM Shield - https://www.arduino.cc/en/Tutorial/GSMExamplesSendSMS
