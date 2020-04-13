@@ -1,4 +1,4 @@
-#include <DHT.h>
+#include <dht.h> //Library for Humiture sensor
 #include <Wire.h> 
 #include <GSM.h> //library for SMS
 
@@ -8,7 +8,7 @@
 GSM gsmAccess;
 GSM_SMS sms;
 
-//dht DHT;//create a variable type of dht
+//dht DHT;//create a variable type of dht for Humiture sensor
 
 //Function Decleration
 void sendSMS(String remoteNumber[], int remoteNumLen, char txtMsg);
@@ -52,19 +52,22 @@ void loop() {
   char txtMsg; //Text Message to be sent
   String remoteNumber[] = { "07773571078", "07460780161" } ; //Numbers to send SMS to
   int remoteNumLen = sizeof(remoteNumber) / sizeof(char); //Get length of remoteNumber array 
+  
   //Humiture Sensor
   int greenhouseTemp = DHT.temperature; //Temperature of greenhouse
   int minDayTemp = 18; //Minimum desired temperature during day time (in celcius)
   int maxDayTemp = 28; //Maximum desired temperature during day time (in celcius)
   int minNightTemp = 10; //Minimum desired temperature during night time (in celcius)
   int tempTimer; //Timer for determining whether to send a text for temperature
-  int tempTimerNew;
-  int tempChangeTimer;
+  int tempTimerNew; //Variable used to change tempTimer
+  int tempChangeTimer; //Timer for tempTimer management
   int greenhouseHum = DHT.humidity ; //Humidity of greenhouse
   int minHum = 70; //Minimum desired humidity
   int humTimer; //Timer for determining whether to send a text for Humidity
+  
   //Photoresistor
   int lightLevel = analogRead(APR_PIN); //Light reading (Dark is 1023 Light is 0)
+  
   //Soil Sensors
   int soil_1 = analogRead(AS1_PIN); //Read soil 1 pin
   int soil_2 = analogRead(AS2_PIN); //Read soil 2 pin
@@ -80,6 +83,7 @@ void loop() {
   if (tempChangeTimer == NULL){
     tempChangeTimer = 0;
   }
+  //End timer setup
   
   //Temperature Check
   if (lightLevel <= 600) { //If it is day
@@ -94,12 +98,15 @@ void loop() {
       tempTimer = tempTimerNew;
     } 
     else if (greenhouseTemp > (minDayTemp + 2)) {
+      //Allow SMS to be sent
       tempTimer = 0;
     }
     else if (greenhouseTemp > (maxDayTemp - 2)) {
+      //Allow SMS to be sent
       tempTimer = 0;
     }
     else {
+      //Ensures that changes in temperature above and below the minimum and maximum do not re-send SMS
       if (tempChangeTimer < txtPeriod) {
         tempChangeTimer = tempChangeTimer + 1;
         tempTimer = 1;
@@ -116,9 +123,11 @@ void loop() {
       tempTimer = tempTimerNew;
     }
     else if (greenhouseTemp > (minNightTemp + 2)) {
+      //Allow SMS to be sent
       tempTimer = 0;
     }
     else {
+      //Ensures that changes in temperature above and below the minimum do not re-send SMS
       if (tempChangeTimer < txtPeriod) {
         tempChangeTimer = tempChangeTimer + 1;
         tempTimer = 1;
@@ -137,9 +146,10 @@ void loop() {
   }
   //End Humidity Check
   
-}//End Loop
+}
+//End Loop
 
-//Send SMS to all phone numbers 
+//Send SMS to all stored phone numbers 
 void sendSMS(String remoteNumber[], int remoteNumLen, char txtMsg) {
   for (int i = 0; i < remoteNumLen; i = i + 1) {
     sms.beginSMS(remoteNumber[i]);

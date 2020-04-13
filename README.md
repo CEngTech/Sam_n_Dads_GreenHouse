@@ -34,3 +34,4 @@ Resources:
 	SMS on Arduino with GSM - https://www.arduino.cc/en/Tutorial/GSMExamplesSendSMS
 `	Sunfounder Humiture Sensor - https://www.sunfounder.com/learn/Sensor-Kit-v2-0-for-Arduino/lesson-11-humiture-detection-sensor-kit-v2-0-for-arduino.html
 	Sunfounder Photoresistor - https://www.sunfounder.com/learn/Sensor-Kit-v2-0-for-Arduino/lesson-17-photoswitch-sensor-kit-v2-0-for-arduino.html
+	Arduino http over mobile network - https://www.youtube.com/watch?v=cpgQOmQwUL8
