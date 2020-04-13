@@ -1,5 +1,5 @@
 
-#include <dht.h>
+#include <DHT.h>
 #include <Wire.h> 
 #include <GSM.h> //library for SMS
 
@@ -9,8 +9,7 @@
 GSM gsmAccess;
 GSM_SMS sms;
 
-//set the LCD address to 0x27 for a 16 chars and 2 line display
-dht DHT;//create a variable type of dht
+//dht DHT;//create a variable type of dht
 
 //Function Decleration
 void sendSMS(remoteNumber, remoteNumLen, txtMsg);
@@ -18,8 +17,8 @@ int tempSMS(tempTimer, remoteNumber, remoteNumLen, txtMsg);
 
 //Constant Declaration
 //Digital Pins
-  const int DM1_PIN = D2; //Motor 1 attach to pin2
-  const int DM2_PIN = D3; //Motor 1 attach to pin3
+  const int DM1_PIN = 2; //Motor 1 attach to pin2
+  const int DM2_PIN = 3; //Motor 1 attach to pin3
   const int DHT11_PIN = 4; //Humiture sensor attach to pin4
 //Analog Pins
   const int AS1_PIN = A0; //Soil 1 sensor attach to pin0
@@ -27,7 +26,8 @@ int tempSMS(tempTimer, remoteNumber, remoteNumLen, txtMsg);
   const int AS3_PIN = A2; //Soil 3 sensor attach to pin2
   const int AS4_PIN = A3; //Soil 4 sensor attach to pin3
   const int APR_PIN = A4; //PhotoResitor sensor attach to pin4
-const int txtPeriod = 99999999; //How many loops should happen before a duplicate text is sent
+//SMS
+  const int txtPeriod = 99999999; //How many loops should happen before a duplicate text is sent
   
 
 void setup() {
@@ -66,7 +66,6 @@ void loop() {
   int humTimer; //Timer for determining whether to send a text for Humidity
   //Photoresistor
   int lightLevel = analogRead(APR_PIN); //Light reading (Dark is 1023 Light is 0)
-  bool day; //Is it day?
   //Soil Sensors
   int soil_1 = analogRead(AS1_PIN); //Read soil 1 pin
   int soil_2 = analogRead(AS2_PIN); //Read soil 2 pin
@@ -85,10 +84,6 @@ void loop() {
   
   //Temperature Check
   if (lightLevel <= 600) { //If it is day
-    if (day == false) { //If it was previously night reset tempTimer
-      tempTimer = 0;
-    }
-    bool day = true; //It is day
     if (greenhouseTemp > maxDayTemp) {
       char txtMsg = "Greenhouse Too Hot!";
       tempTimerNew = tempSMS(tempTimer, remoteNumber, remoteNumLen, txtMsg);
@@ -113,10 +108,6 @@ void loop() {
     }
   } 
   else { //If it is night
-    if (day == True) { //If it was previously day reset tempTimer
-      tempTimer = 0;
-    }
-    bool day = false; //It is night
     if (greenhouseTemp < minNightTemp) { 
       char txtMsg = "Greenhouse Too Cold!";
       tempTimerNew = tempSMS(tempTimer, remoteNumber, remoteNumLen, txtMsg);
@@ -142,7 +133,7 @@ void loop() {
     sendSMS(remoteNumber, remoteNumLen, txtMsg);
   }
   
-}
+}//End Loop
 
 //Send SMS to all phone numbers 
 void sendSMS(remoteNumber, remoteNumLen, txtMsg) {
