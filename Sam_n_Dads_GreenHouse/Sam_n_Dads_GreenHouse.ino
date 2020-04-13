@@ -14,17 +14,21 @@ dht DHT;//create a variable type of dht
 
 //Function Decleration
 void humitureCheck();
+void sendSMS(remoteNumber, remoteNumLen, txtMsg);
+int tempSMS(tempTimer, remoteNumber, remoteNumLen, txtMsg);
 
+//Constant Declaration
 //Digital Pins
-const int DM1_PIN = D2; //Motor 1 attach to pin2
-const int DM2_PIN = D3; //Motor 1 attach to pin3
-const int DHT11_PIN = 4; //Humiture sensor attach to pin4
+  const int DM1_PIN = D2; //Motor 1 attach to pin2
+  const int DM2_PIN = D3; //Motor 1 attach to pin3
+  const int DHT11_PIN = 4; //Humiture sensor attach to pin4
 //Analog Pins
-const int AS1_PIN = A0; //Soil 1 sensor attach to pin0
-const int AS2_PIN = A1; //Soil 2 sensor attach to pin1
-const int AS3_PIN = A2; //Soil 3 sensor attach to pin2
-const int AS4_PIN = A3; //Soil 4 sensor attach to pin3
-const int APR_PIN = A4; //PhotoResitor sensor attach to pin4
+  const int AS1_PIN = A0; //Soil 1 sensor attach to pin0
+  const int AS2_PIN = A1; //Soil 2 sensor attach to pin1
+  const int AS3_PIN = A2; //Soil 3 sensor attach to pin2
+  const int AS4_PIN = A3; //Soil 4 sensor attach to pin3
+  const int APR_PIN = A4; //PhotoResitor sensor attach to pin4
+const int txtPeriod = 9999; //How many loops should happen before a duplicate text is sent
   
 
 void setup() {
@@ -52,27 +56,85 @@ void loop() {
   int remoteNumLen = sizeof(remoteNumber) / sizeof(char); //Get length of remoteNumber array 
   //Humiture Sensor
   int greenhouseTemp = DHT.temperature; //Temperature of greenhouse
-  int minDayTemp = 18;
-  int maxDayTemp = 28;
-  int minNightTemp = 10;
+  int minDayTemp = 18; //Minimum desired temperature during day time (in celcius)
+  int maxDayTemp = 28; //Maximum desired temperature during day time (in celcius)
+  int minNightTemp = 10; //Minimum desired temperature during night time (in celcius)
+  int tempTimer; //Timer for determining whether to send a text for temperature
+  int tempTimerNew;
+  int tempChangeTimer;
   int greenhouseHum = DHT.humidity ; //Humidity of greenhouse
-  int minHum = 70;
+  int minHum = 70; //Minimum desired humidity
+  int humTimer; //Timer for determining whether to send a text for Humidity
   //Photoresistor
-  int lightLevel = analogRead(A4); //Light reading (Dark is 1023 Light is 0)
+  int lightLevel = analogRead(APR_PIN); //Light reading (Dark is 1023 Light is 0)
+  bool day; //Is it day?
+  //Soil Sensors
+  int soil_1 = analogRead(AS1_PIN); //Read soil 1 pin
+  int soil_2 = analogRead(AS2_PIN); //Read soil 2 pin
+  int soil_3 = analogRead(AS3_PIN); //Read soil 3 pin
+  int soil_4 = analogRead(AS4_PIN); //Read soil 4 pin
+  int soilMean = (soil_1 + soil_2 + soil_3 + soil_4) / 4; //Mean for soil moisture
 
+  //Initial timer Setup
+  if (tempTimer == NULL){
+    tempTimer = 0;
+  }
+
+  if (tempChangeTimer == NULL){
+    tempChangeTimer = 0;
+  }
+  
   //Temperature Check
-  if (lightLevel >= /*high light value*/) { //If it is day
-    if (greenhouseTemp > maxDayTemp) { 
-      char txtMsg = "Greenhouse Too Hot!";
-      sendSMS(remoteNumber, remoteNumLen, txtMsg);
-    } else if (greenhouseTemp < minDayTemp) {
-      char txtMsg = "Greenhouse Too Cold!";
-      sendSMS(remoteNumber, remoteNumLen, txtMsg);
+  if (lightLevel <= 600) { //If it is day
+    if (day == false) { //If it was previously night reset tempTimer
+      tempTimer = 0;
     }
-  } else { //If it is night
+    bool day = true; //It is day
+    if (greenhouseTemp > maxDayTemp) {
+      char txtMsg = "Greenhouse Too Hot!";
+      tempTimerNew = tempSMS(tempTimer, remoteNumber, remoteNumLen, txtMsg);
+      tempTimer = tempTimerNew;
+    } 
+    else if (greenhouseTemp < minDayTemp) {
+      char txtMsg = "Greenhouse Too Cold!";
+      tempTimerNew = tempSMS(tempTimer, remoteNumber, remoteNumLen, txtMsg);
+      tempTimer = tempTimerNew;
+    } 
+    else if (greenhouseTemp > (minDayTemp + 2)) {
+      tempTimer = 0;
+    }
+    else {
+      if (tempChangeTimer < txtPeriod) {
+        tempChangeTimer = tempChangeTimer + 1;
+        tempTimer = 1;
+      } else {
+        tempChangeTimer = 0;
+        tempTimer = 1;
+      }
+    }
+  } 
+  else { //If it is night
+    if (day == True) { //If it was previously day reset tempTimer
+      tempTimer = 0;
+    }
+    bool day = false; //It is night
     if (greenhouseTemp < minNightTemp) { 
       char txtMsg = "Greenhouse Too Cold!";
-      sendSMS(remoteNumber, remoteNumLen, txtMsg);
+      tempTimerNew = tempSMS(tempTimer, remoteNumber, remoteNumLen, txtMsg);
+      tempTimer = tempTimerNew;
+    }
+    else if (greenhouseTemp > (minNightTemp + 2)) {
+      tempTimer = 0;
+    }
+    else {
+      if (tempChangeTimer < txtPeriod) {
+        tempChangeTimer = tempChangeTimer + 1;
+        tempTimer = 1;
+      } else {
+        tempChangeTimer = 0;
+        tempTimer = 1;
+      }
+    }
   }
 
   //Humidity Check
@@ -92,6 +154,22 @@ void sendSMS(remoteNumber, remoteNumLen, txtMsg) {
   }
 }
 
+//Determines if an SMS should be send depending on when the previous was sent 
+int tempSMS(tempTimer, remoteNumber, remoteNumLen, txtMsg) {
+  if (tempTimer == 0) {
+    sendSMS(remoteNumber, remoteNumLen, txtMsg);
+    tempTimer = tempTimer + 1;
+  } 
+  else if (tempTimer == txtPeriod) { 
+    tempTimer = 0;
+  } 
+  else {
+    tempTimer = tempTimer + 1;
+  }
+  return(tempTimer);
+}
+
+//Check the humiture sebsor status
 void humitureCheck() {
   int chk = DHT.read11(DHT11_PIN);//read the value returned from Humiture sensor
 
