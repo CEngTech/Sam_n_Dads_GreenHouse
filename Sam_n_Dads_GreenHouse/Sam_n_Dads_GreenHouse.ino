@@ -13,7 +13,6 @@ GSM_SMS sms;
 dht DHT;//create a variable type of dht
 
 //Function Decleration
-void humitureCheck();
 void sendSMS(remoteNumber, remoteNumLen, txtMsg);
 int tempSMS(tempTimer, remoteNumber, remoteNumLen, txtMsg);
 
@@ -28,7 +27,7 @@ int tempSMS(tempTimer, remoteNumber, remoteNumLen, txtMsg);
   const int AS3_PIN = A2; //Soil 3 sensor attach to pin2
   const int AS4_PIN = A3; //Soil 4 sensor attach to pin3
   const int APR_PIN = A4; //PhotoResitor sensor attach to pin4
-const int txtPeriod = 9999; //How many loops should happen before a duplicate text is sent
+const int txtPeriod = 99999999; //How many loops should happen before a duplicate text is sent
   
 
 void setup() {
@@ -167,25 +166,4 @@ int tempSMS(tempTimer, remoteNumber, remoteNumLen, txtMsg) {
     tempTimer = tempTimer + 1;
   }
   return(tempTimer);
-}
-
-//Check the humiture sebsor status
-void humitureCheck() {
-  int chk = DHT.read11(DHT11_PIN);//read the value returned from Humiture sensor
-
-  //Humiture sensor check
-  switch (chk) {
-    case DHTLIB_OK: 
-    //Serial.println("OK!");
-    break;
-    case DHTLIB_ERROR_CHECKSUM: 
-    //Serial.print("Checksum error,\t"); 
-    break;
-    case DHTLIB_ERROR_TIMEOUT: 
-    //Serial.print("Time out error,\t"); 
-    break;
-    default: 
-    //Serial.print("Unknown error,\t"); 
-    break;
-  }
 }
