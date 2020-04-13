@@ -108,7 +108,7 @@ void loop() {
         tempTimer = 1;
       } else {
         tempChangeTimer = 0;
-        tempTimer = 1;
+        tempTimer = 0;
       }
     }
   } 
@@ -131,7 +131,7 @@ void loop() {
         tempTimer = 1;
       } else {
         tempChangeTimer = 0;
-        tempTimer = 1;
+        tempTimer = 0;
       }
     }
   }
