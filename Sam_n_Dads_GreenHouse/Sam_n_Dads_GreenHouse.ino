@@ -1,4 +1,3 @@
-
 #include <DHT.h>
 #include <Wire.h> 
 #include <GSM.h> //library for SMS
@@ -12,8 +11,8 @@ GSM_SMS sms;
 //dht DHT;//create a variable type of dht
 
 //Function Decleration
-void sendSMS(char remoteNumber[], int remoteNumLen, char txtMsg);
-int tempSMS(int tempTimer, char remoteNumber[], int remoteNumLen, char txtMsg);
+void sendSMS(String remoteNumber[], int remoteNumLen, char txtMsg);
+int tempSMS(int tempTimer, String remoteNumber[], int remoteNumLen, char txtMsg);
 
 //Constant Declaration
 //Digital Pins
@@ -51,7 +50,7 @@ void setup() {
 void loop() {
   //SMS
   char txtMsg; //Text Message to be sent
-  char remoteNumber[] = { "07773571078", "07460780161" } ; //Numbers to send SMS to
+  String remoteNumber[] = { "07773571078", "07460780161" } ; //Numbers to send SMS to
   int remoteNumLen = sizeof(remoteNumber) / sizeof(char); //Get length of remoteNumber array 
   //Humiture Sensor
   int greenhouseTemp = DHT.temperature; //Temperature of greenhouse
@@ -129,17 +128,19 @@ void loop() {
       }
     }
   }
+  //End Temperature Check
 
   //Humidity Check
   if (greenhouseHum < minHum) { 
     char txtMsg = "Greenhouse Needs More Humidity!";
     sendSMS(remoteNumber, remoteNumLen, txtMsg);
   }
+  //End Humidity Check
   
 }//End Loop
 
 //Send SMS to all phone numbers 
-void sendSMS(char remoteNumber[], int remoteNumLen, char txtMsg) {
+void sendSMS(String remoteNumber[], int remoteNumLen, char txtMsg) {
   for (int i = 0; i < remoteNumLen; i = i + 1) {
     sms.beginSMS(remoteNumber[i]);
     sms.print(txtMsg);
@@ -148,7 +149,7 @@ void sendSMS(char remoteNumber[], int remoteNumLen, char txtMsg) {
 }
 
 //Determines if an SMS should be send depending on when the previous was sent 
-int tempSMS(int tempTimer, char remoteNumber[], int remoteNumLen, char txtMsg) {
+int tempSMS(int tempTimer, String remoteNumber[], int remoteNumLen, char txtMsg) {
   if (tempTimer == 0) {
     sendSMS(remoteNumber, remoteNumLen, txtMsg);
     tempTimer = tempTimer + 1;
