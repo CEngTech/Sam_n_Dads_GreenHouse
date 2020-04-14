@@ -147,8 +147,6 @@ void loop() {
     sendSMS(remoteNumber, remoteNumLen, txtMsg);
   }
   //End Humidity Check
-<<<<<<< HEAD
-=======
 
   //Watering
   if (soilMean < minSoil) {
@@ -167,7 +165,6 @@ void loop() {
     } while (soilMean < maxSoil);
   }
   //End Watering
->>>>>>> SSHardy
   
 }
 //End Loop
